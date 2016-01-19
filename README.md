@@ -1,3 +1,6 @@
+***Note:*** *This fork provides a working implementation (including signature verification) for BNP Paribas. See https://github.com/bkoelman/iDeal.Net/blob/master/iDeal.Example/App_Data/readme.txt for help running the sample.*
+
+
 # iDeal.NET
 iDeal is the leading online payment platform in the Netherlands. 
 iDeal.NET provides an API to easily communicate with your iDeal provider and integrate iDeal payments into your .NET (web)applications.

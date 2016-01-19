@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("iDeal.NET")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("https://github.com/bkoelman/iDeal.Net")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("iDeal.NET")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyCopyright("LGPL")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
