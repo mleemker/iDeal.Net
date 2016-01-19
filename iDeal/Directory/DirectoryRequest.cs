@@ -25,16 +25,14 @@ namespace iDeal.Directory
         /// </summary>
         public override string ToXml(ISignatureProvider signatureProvider)
         {
-            XNamespace xmlNamespace = "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1";
-
             var directoryRequestXmlMessage = new XDocument(
                 new XDeclaration("1.0", "UTF-8", null),
-                new XElement(xmlNamespace + "DirectoryReq",
+                new XElement(Xml.Ns + "DirectoryReq",
                     new XAttribute("version", "3.3.1"),
-                    new XElement(xmlNamespace + "createDateTimestamp", CreateDateTimestamp),
-                    new XElement(xmlNamespace + "Merchant",
-                        new XElement(xmlNamespace + "merchantID", MerchantId.PadLeft(9, '0')),
-                        new XElement(xmlNamespace + "subID", "0"))));
+                    new XElement(Xml.Ns + "createDateTimestamp", CreateDateTimestamp),
+                    new XElement(Xml.Ns + "Merchant",
+                        new XElement(Xml.Ns + "merchantID", MerchantId.PadLeft(9, '0')),
+                        new XElement(Xml.Ns + "subID", "0"))));
 
             return signatureProvider.SignRequestXml(directoryRequestXmlMessage);
         }

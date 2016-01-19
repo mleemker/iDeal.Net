@@ -32,27 +32,25 @@ namespace iDeal.Directory
         {
             // Parse document
             XElement xDocument = XElement.Parse(xmlDirectoryResponse);
-            XNamespace xmlNamespace = "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1";
 
             // Create datetimestamp
-            CreateDateTimestamp = xDocument.Element(xmlNamespace + "createDateTimestamp").Value;
+            CreateDateTimestamp = xDocument.Element(Xml.Ns + "createDateTimestamp").Value;
 
             // Acquirer id
-            AcquirerId = (int) xDocument.Element(xmlNamespace + "Acquirer").Element(xmlNamespace + "acquirerID");
+            AcquirerId = (int) xDocument.Element(Xml.Ns + "Acquirer").Element(Xml.Ns + "acquirerID");
 
             // Directory datetimestamp
             DirectoryDateTimeStamp =
-                xDocument.Element(xmlNamespace + "Directory").Element(xmlNamespace + "directoryDateTimestamp").Value;
+                xDocument.Element(Xml.Ns + "Directory").Element(Xml.Ns + "directoryDateTimestamp").Value;
 
             // Get list of countries
-            foreach (
-                XElement country in xDocument.Element(xmlNamespace + "Directory").Elements(xmlNamespace + "Country"))
+            foreach (XElement country in xDocument.Element(Xml.Ns + "Directory").Elements(Xml.Ns + "Country"))
             {
                 // Get list of issuers
-                foreach (XElement issuer in country.Elements(xmlNamespace + "Issuer"))
+                foreach (XElement issuer in country.Elements(Xml.Ns + "Issuer"))
                 {
-                    issuers.Add(new Issuer(issuer.Element(xmlNamespace + "issuerID").Value,
-                        issuer.Element(xmlNamespace + "issuerName").Value));
+                    issuers.Add(new Issuer(issuer.Element(Xml.Ns + "issuerID").Value,
+                        issuer.Element(Xml.Ns + "issuerName").Value));
                 }
             }
         }

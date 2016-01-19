@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Web.UI;
 using iDeal.Base;
 using iDeal.Directory;
@@ -51,7 +52,7 @@ namespace iDeal.Example
                 var ideal = new iDealService();
 
                 var issuers = (IList<Issuer>) Session["issuers"];
-                int amount = int.Parse(txtAmount.Value);
+                decimal amount = decimal.Parse(txtAmount.Value, CultureInfo.InvariantCulture);
                 TransactionResponse response = ideal.SendTransactionRequest(issuers[0].Id, "http://www.your-url.com",
                     "purchaseId", amount, TimeSpan.FromMinutes(5), "Buy something for " + txtAmount.Value + " euro",
                     "myentrancecode");
@@ -92,7 +93,7 @@ namespace iDeal.Example
                 StatusResponse response = ideal.SendStatusRequest((string) Session["transactionid"]);
 
                 logResult.InnerHtml += string.Format("Status:{0}<br>", response.Status);
-                logResult.InnerHtml = string.Format("TransactionId:{0}<br>", response.TransactionId);
+                logResult.InnerHtml += string.Format("TransactionId:{0}<br>", response.TransactionId);
                 logResult.InnerHtml += string.Format("AcquirerId:{0}<br>", response.AcquirerId);
                 logResult.InnerHtml += string.Format("ConsumerName:{0}<br>", response.ConsumerName);
                 logResult.InnerHtml += string.Format("ConsumerIBAN:{0}<br>", response.ConsumerIBAN);

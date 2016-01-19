@@ -24,24 +24,22 @@ namespace iDeal.Transaction
         {
             // Parse document
             XElement xDocument = XElement.Parse(xmlDirectoryResponse);
-            XNamespace xmlNamespace = "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1";
 
             // Create datetimestamp
-            CreateDateTimestamp = xDocument.Element(xmlNamespace + "createDateTimestamp").Value;
+            CreateDateTimestamp = xDocument.Element(Xml.Ns + "createDateTimestamp").Value;
 
             // Acquirer id
-            AcquirerId = (int) xDocument.Element(xmlNamespace + "Acquirer").Element(xmlNamespace + "acquirerID");
+            AcquirerId = (int) xDocument.Element(Xml.Ns + "Acquirer").Element(Xml.Ns + "acquirerID");
 
             // IssuerAuthenticationUrl
             IssuerAuthenticationUrl =
-                xDocument.Element(xmlNamespace + "Issuer").Element(xmlNamespace + "issuerAuthenticationURL").Value;
+                xDocument.Element(Xml.Ns + "Issuer").Element(Xml.Ns + "issuerAuthenticationURL").Value;
 
             // TransactionId
-            TransactionId =
-                xDocument.Element(xmlNamespace + "Transaction").Element(xmlNamespace + "transactionID").Value;
+            TransactionId = xDocument.Element(Xml.Ns + "Transaction").Element(Xml.Ns + "transactionID").Value;
 
             // PurchaseId
-            PurchaseId = xDocument.Element(xmlNamespace + "Transaction").Element(xmlNamespace + "purchaseID").Value;
+            PurchaseId = xDocument.Element(Xml.Ns + "Transaction").Element(Xml.Ns + "purchaseID").Value;
         }
     }
 }

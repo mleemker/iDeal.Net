@@ -17,14 +17,11 @@ namespace iDeal.Base
 
         public iDealException(XElement xDocument)
         {
-            XNamespace xmlNamespace = "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1";
-
-            CreateDateTimestamp = DateTime.Parse(xDocument.Element(xmlNamespace + "createDateTimestamp").Value);
-
-            ErrorCode = xDocument.Element(xmlNamespace + "Error").Element(xmlNamespace + "errorCode").Value;
-            ErrorMessage = xDocument.Element(xmlNamespace + "Error").Element(xmlNamespace + "errorMessage").Value;
-            ErrorDetail = xDocument.Element(xmlNamespace + "Error").Element(xmlNamespace + "errorDetail").Value;
-            ConsumerMessage = xDocument.Element(xmlNamespace + "Error").Element(xmlNamespace + "consumerMessage").Value;
+            CreateDateTimestamp = DateTime.Parse(xDocument.Element(Xml.Ns + "createDateTimestamp").Value);
+            ErrorCode = xDocument.Element(Xml.Ns + "Error").Element(Xml.Ns + "errorCode").Value;
+            ErrorMessage = xDocument.Element(Xml.Ns + "Error").Element(Xml.Ns + "errorMessage").Value;
+            ErrorDetail = xDocument.Element(Xml.Ns + "Error").Element(Xml.Ns + "errorDetail").Value;
+            ConsumerMessage = xDocument.Element(Xml.Ns + "Error").Element(Xml.Ns + "consumerMessage").Value;
         }
     }
 }

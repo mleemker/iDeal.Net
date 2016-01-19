@@ -56,20 +56,18 @@ namespace iDeal.Status
         {
             // Parse document
             XElement xDocument = XElement.Parse(xmlStatusResponse);
-            XNamespace xmlNamespace = "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1";
 
             // Create datetimestamp
-            CreateDateTimestamp = (xDocument.Element(xmlNamespace + "createDateTimestamp").Value);
+            CreateDateTimestamp = (xDocument.Element(Xml.Ns + "createDateTimestamp").Value);
 
             // Acquirer id
-            AcquirerId = (int) xDocument.Element(xmlNamespace + "Acquirer").Element(xmlNamespace + "acquirerID");
+            AcquirerId = (int) xDocument.Element(Xml.Ns + "Acquirer").Element(Xml.Ns + "acquirerID");
 
             // TransactionId
-            TransactionId =
-                xDocument.Element(xmlNamespace + "Transaction").Element(xmlNamespace + "transactionID").Value;
+            TransactionId = xDocument.Element(Xml.Ns + "Transaction").Element(Xml.Ns + "transactionID").Value;
 
             // Status
-            switch (xDocument.Element(xmlNamespace + "Transaction").Element(xmlNamespace + "status").Value)
+            switch (xDocument.Element(Xml.Ns + "Transaction").Element(Xml.Ns + "status").Value)
             {
                 case "Success":
                     Status = Status.Success;
@@ -93,16 +91,13 @@ namespace iDeal.Status
             if (Status == Status.Success)
             {
                 // Consumer name
-                ConsumerName =
-                    xDocument.Element(xmlNamespace + "Transaction").Element(xmlNamespace + "consumerName").Value;
+                ConsumerName = xDocument.Element(Xml.Ns + "Transaction").Element(Xml.Ns + "consumerName").Value;
 
                 // Consumer account number
-                ConsumerIBAN =
-                    xDocument.Element(xmlNamespace + "Transaction").Element(xmlNamespace + "consumerIBAN").Value;
+                ConsumerIBAN = xDocument.Element(Xml.Ns + "Transaction").Element(Xml.Ns + "consumerIBAN").Value;
 
                 // Consumer city
-                ConsumerBIC =
-                    xDocument.Element(xmlNamespace + "Transaction").Element(xmlNamespace + "consumerBIC").Value;
+                ConsumerBIC = xDocument.Element(Xml.Ns + "Transaction").Element(Xml.Ns + "consumerBIC").Value;
             }
         }
     }

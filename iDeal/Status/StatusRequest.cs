@@ -45,18 +45,16 @@ namespace iDeal.Status
 
         public override string ToXml(ISignatureProvider signatureProvider)
         {
-            XNamespace xmlNamespace = "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1";
-
             var directoryRequestXmlMessage = new XDocument(
                 new XDeclaration("1.0", "UTF-8", null),
-                new XElement(xmlNamespace + "AcquirerStatusReq",
+                new XElement(Xml.Ns + "AcquirerStatusReq",
                     new XAttribute("version", "3.3.1"),
-                    new XElement(xmlNamespace + "createDateTimestamp", CreateDateTimestamp),
-                    new XElement(xmlNamespace + "Merchant",
-                        new XElement(xmlNamespace + "merchantID", MerchantId.PadLeft(9, '0')),
-                        new XElement(xmlNamespace + "subID", MerchantSubId)),
-                    new XElement(xmlNamespace + "Transaction",
-                        new XElement(xmlNamespace + "transactionID", TransactionId))));
+                    new XElement(Xml.Ns + "createDateTimestamp", CreateDateTimestamp),
+                    new XElement(Xml.Ns + "Merchant",
+                        new XElement(Xml.Ns + "merchantID", MerchantId.PadLeft(9, '0')),
+                        new XElement(Xml.Ns + "subID", MerchantSubId)),
+                    new XElement(Xml.Ns + "Transaction",
+                        new XElement(Xml.Ns + "transactionID", TransactionId))));
 
             return signatureProvider.SignRequestXml(directoryRequestXmlMessage);
         }

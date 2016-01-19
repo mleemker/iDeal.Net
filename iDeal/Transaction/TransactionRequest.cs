@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Xml.Linq;
 using iDeal.Base;
 using iDeal.SignatureProviders;
@@ -63,7 +64,7 @@ namespace iDeal.Transaction
         /// <summary>
         /// Amount measured in cents
         /// </summary>
-        public int Amount { get; private set; }
+        public decimal Amount { get; private set; }
 
         /// <summary>
         /// Time until consumer has to have paid, otherwise the transaction is marked as expired by the issuer (consumer's bank)
@@ -143,7 +144,7 @@ namespace iDeal.Transaction
         }
 
         public TransactionRequest(string merchantId, int? subId, string issuerId, string merchantReturnUrl,
-            string purchaseId, int amount, TimeSpan? expirationPeriod, string description, string entranceCode)
+            string purchaseId, decimal amount, TimeSpan? expirationPeriod, string description, string entranceCode)
         {
             MerchantId = merchantId;
             MerchantSubId = subId ?? 0; // If no sub id is specified, sub id should be 0
@@ -158,28 +159,26 @@ namespace iDeal.Transaction
 
         public override string ToXml(ISignatureProvider signatureProvider)
         {
-            XNamespace xmlNamespace = "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1";
-
             var directoryRequestXmlMessage = new XDocument(
                 new XDeclaration("1.0", "UTF-8", null),
-                new XElement(xmlNamespace + "AcquirerTrxReq",
+                new XElement(Xml.Ns + "AcquirerTrxReq",
                     new XAttribute("version", "3.3.1"),
-                    new XElement(xmlNamespace + "createDateTimestamp", CreateDateTimestamp),
-                    new XElement(xmlNamespace + "Issuer",
-                        new XElement(xmlNamespace + "issuerID", IssuerId.PadLeft(4, '0'))),
-                    new XElement(xmlNamespace + "Merchant",
-                        new XElement(xmlNamespace + "merchantID", MerchantId.PadLeft(9, '0')),
-                        new XElement(xmlNamespace + "subID", "0"),
-                        new XElement(xmlNamespace + "merchantReturnURL", MerchantReturnUrl)),
-                    new XElement(xmlNamespace + "Transaction",
-                        new XElement(xmlNamespace + "purchaseID", PurchaseId),
-                        new XElement(xmlNamespace + "amount", Amount),
-                        new XElement(xmlNamespace + "currency", "EUR"),
-                        new XElement(xmlNamespace + "expirationPeriod",
+                    new XElement(Xml.Ns + "createDateTimestamp", CreateDateTimestamp),
+                    new XElement(Xml.Ns + "Issuer",
+                        new XElement(Xml.Ns + "issuerID", IssuerId.PadLeft(4, '0'))),
+                    new XElement(Xml.Ns + "Merchant",
+                        new XElement(Xml.Ns + "merchantID", MerchantId.PadLeft(9, '0')),
+                        new XElement(Xml.Ns + "subID", "0"),
+                        new XElement(Xml.Ns + "merchantReturnURL", MerchantReturnUrl)),
+                    new XElement(Xml.Ns + "Transaction",
+                        new XElement(Xml.Ns + "purchaseID", PurchaseId),
+                        new XElement(Xml.Ns + "amount", Amount.ToString("0.##", CultureInfo.InvariantCulture)),
+                        new XElement(Xml.Ns + "currency", "EUR"),
+                        new XElement(Xml.Ns + "expirationPeriod",
                             "PT" + Convert.ToInt32(Math.Floor(ExpirationPeriod.Value.TotalSeconds)) + "S"),
-                        new XElement(xmlNamespace + "language", "nl"),
-                        new XElement(xmlNamespace + "description", Description),
-                        new XElement(xmlNamespace + "entranceCode", EntranceCode))));
+                        new XElement(Xml.Ns + "language", "nl"),
+                        new XElement(Xml.Ns + "description", Description),
+                        new XElement(Xml.Ns + "entranceCode", EntranceCode))));
 
             return signatureProvider.SignRequestXml(directoryRequestXmlMessage);
         }
