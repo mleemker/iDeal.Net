@@ -5,17 +5,22 @@ namespace iDeal.SignatureProviders
     public interface ISignatureProvider
     {
         /// <summary>
-        /// Verifies the digital signature used in status responses from the ideal api (stored in xml field signature value)
+        /// Adds a digital signature to the outgoing request message, before sending it to Acquirer.
         /// </summary>
-        /// <param name="signature">
-        /// Signature provided by ideal api, stored in signature value xml field
+        /// <param name="requestXml">
+        /// The unsigned request XML message.
         /// </param>
-        /// <param name="messageDigest">
-        /// Concatenation of designated fields from the status response
-        /// </param>
-        bool VerifySignature(string xml);
+        /// <returns>
+        /// The request message, including digital signature.
+        /// </returns>
+        string SignRequestXml(XDocument requestXml);
 
         /// <summary>
-        string SignXml(XDocument directoryRequestXmlMessage);
+        /// Verifies the digital signature in the response message that was received from Acquirer.
+        /// </summary>
+        /// <param name="responseXml">
+        /// Response XML message, coming from Acquirer.
+        /// </param>
+        void VerifyResponseSignature(string responseXml);
     }
 }

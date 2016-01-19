@@ -36,7 +36,7 @@ namespace iDeal.Directory
                         new XElement(xmlNamespace + "merchantID", MerchantId.PadLeft(9, '0')),
                         new XElement(xmlNamespace + "subID", "0"))));
 
-            return signatureProvider.SignXml(directoryRequestXmlMessage);
+            return signatureProvider.SignRequestXml(directoryRequestXmlMessage);
         }
     }
 }

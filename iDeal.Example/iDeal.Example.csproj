@@ -57,10 +57,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Data\cert.cer" />
-    <Content Include="App_Data\certficate.pfx" />
-    <Content Include="App_Data\ideal_v3.cer" />
-    <Content Include="App_Data\priv.pem" />
+    <Content Include="App_Data\acceptant-private-certificate.p12" />
+    <Content Include="App_Data\acquirer-public-certificate.cer" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -69,6 +67,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Data\readme.txt" />
     <Content Include="Default.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>

@@ -181,7 +181,7 @@ namespace iDeal.Transaction
                         new XElement(xmlNamespace + "description", Description),
                         new XElement(xmlNamespace + "entranceCode", EntranceCode))));
 
-            return signatureProvider.SignXml(directoryRequestXmlMessage);
+            return signatureProvider.SignRequestXml(directoryRequestXmlMessage);
         }
     }
 }

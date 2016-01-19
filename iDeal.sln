@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iDeal", "iDeal\iDeal.csproj", "{537CBDF2-6F0B-4D85-B215-45B02751274A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iDeal.Example", "iDeal.Example\iDeal.Example.csproj", "{CCE32CE8-C3C8-4135-AF1C-7BCD4823E0CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iDeal", "iDeal\iDeal.csproj", "{537CBDF2-6F0B-4D85-B215-45B02751274A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -58,7 +58,7 @@ namespace iDeal.Status
                     new XElement(xmlNamespace + "Transaction",
                         new XElement(xmlNamespace + "transactionID", TransactionId))));
 
-            return signatureProvider.SignXml(directoryRequestXmlMessage);
+            return signatureProvider.SignRequestXml(directoryRequestXmlMessage);
         }
     }
 }

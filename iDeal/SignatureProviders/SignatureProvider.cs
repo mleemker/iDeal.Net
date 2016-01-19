@@ -1,97 +1,154 @@
-﻿using System.IO;
+﻿using System.Deployment.Internal.CodeSigning;
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 using System.Xml;
 using System.Xml.Linq;
+using iDeal.Base;
 
 namespace iDeal.SignatureProviders
 {
     public class SignatureProvider : ISignatureProvider
     {
-        private readonly X509Certificate2 privateCertificate;
-        private readonly X509Certificate2 publicCertificate;
+        private const int ProvRsaAes = 24;
 
-        public SignatureProvider(X509Certificate2 privateCertificate, X509Certificate2 publicCertificate)
+        private readonly X509Certificate2 acceptantPrivateCertificate;
+        private readonly X509Certificate2 acquirerPublicCertificate;
+
+        static SignatureProvider()
         {
-            this.privateCertificate = privateCertificate;
-            this.publicCertificate = publicCertificate;
+            CryptoConfig.AddAlgorithm(typeof (RSAPKCS1SHA256SignatureDescription),
+                "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+        }
+
+        public SignatureProvider(X509Certificate2 acceptantPrivateCertificate,
+            X509Certificate2 acquirerPublicCertificate)
+        {
+            this.acceptantPrivateCertificate = acceptantPrivateCertificate;
+            this.acquirerPublicCertificate = acquirerPublicCertificate;
         }
 
         /// <summary>
-        /// Verifies the digital signature used in status responses from the ideal api (stored in xml field signature value)
+        /// Adds a digital signature to the outgoing request message, before sending it to Acquirer.
         /// </summary>
-        /// <param name="signature">
-        /// Signature provided by ideal api, stored in signature value xml field
+        /// <param name="requestXml">
+        /// The unsigned request XML message.
         /// </param>
-        /// <param name="messageDigest">
-        /// Concatenation of designated fields from the status response
-        /// </param>
-        public bool VerifySignature(string xml)
+        /// <returns>
+        /// The request message, including digital signature.
+        /// </returns>
+        public string SignRequestXml(XDocument requestXml)
         {
-            return true;
-            /*
-          using (MemoryStream streamIn = new MemoryStream())
-          {
-            using (StreamWriter w = new StreamWriter(streamIn))
-            {
-              w.Write(xml);
-              w.Flush();
-              streamIn.Position = 0;
-              RSA rsaKey = (RSACryptoServiceProvider)_publicCertificate.PublicKey.Key;
+            XmlDocument document = ToXmlDocument(requestXml);
 
-              XmlDocument xmlDoc = new XmlDocument();
-              xmlDoc.PreserveWhitespace = true;
-              xmlDoc.Load(streamIn);
-              SignedXml signedXml = new SignedXml(xmlDoc);
-              XmlNodeList nodeList = xmlDoc.GetElementsByTagName("Signature");
-              signedXml.LoadXml((XmlElement)nodeList[0]);
-              bool result = signedXml.CheckSignature(_publicCertificate, true);
-              return result;
-            }
-          }*/
+            RSACryptoServiceProvider key = ExtractPrivateKeyFrom(acceptantPrivateCertificate);
+
+            var signedXml = new SignedXml(document) { SigningKey = key };
+            signedXml.SignedInfo.SignatureMethod = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+            signedXml.SignedInfo.CanonicalizationMethod = "http://www.w3.org/2001/10/xml-exc-c14n#";
+
+            // Add a signing reference, the uri is empty and so the whole document is signed. 
+            var reference = new Reference { DigestMethod = @"http://www.w3.org/2001/04/xmlenc#sha256" };
+            reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
+            reference.Uri = "";
+            signedXml.AddReference(reference);
+
+            // Add the certificate as key info. Because of this, the certificate 
+            // with the public key will be added in the signature part. 
+            var keyInfo = new KeyInfo();
+            keyInfo.AddClause(new KeyInfoName(acceptantPrivateCertificate.Thumbprint));
+            signedXml.KeyInfo = keyInfo;
+
+            // Generate the signature. 
+            signedXml.ComputeSignature();
+
+            XmlElement xmlSignature = signedXml.GetXml();
+            document.DocumentElement.AppendChild(document.ImportNode(xmlSignature, true));
+
+            // Check that outgoing signature is valid. Private certificate also contains public part.
+            VerifyDocumentSignature(document, acceptantPrivateCertificate);
+
+            return GetContentsFrom(document);
         }
 
-        public string SignXml(XDocument xml)
+        /// <summary>
+        /// Verifies the digital signature in the response message that was received from Acquirer.
+        /// </summary>
+        /// <param name="responseXml">
+        /// Response XML message, coming from Acquirer.
+        /// </param>
+        public void VerifyResponseSignature(string responseXml)
         {
-            using (var streamIn = new MemoryStream())
+            XmlDocument document = ToXmlDocument(responseXml);
+            VerifyDocumentSignature(document, acquirerPublicCertificate);
+        }
+
+        private static void VerifyDocumentSignature(XmlDocument document, X509Certificate2 publicCertificate)
+        {
+            XmlNodeList nodeList = document.GetElementsByTagName("Signature");
+            XmlElement signatureElement = nodeList.Cast<XmlElement>().First();
+
+            var signedXml = new SignedXml(document);
+            signedXml.LoadXml(signatureElement);
+
+            if (!signedXml.CheckSignature(publicCertificate, true))
             {
-                xml.Save(streamIn);
-                streamIn.Position = 0;
-                //  var rsaKey = (RSACryptoServiceProvider)_privateCertificate.PrivateKey; // Create rsa crypto provider from private key contained in certificate, weirdest cast ever!;
+                throw new InvalidSignatureException();
+            }
+        }
 
-                // string sCertFileLocation = @"C:\plugins\idealtest\bin\Debug\certficate.pfx";
-                // X509Certificate2 certificate = new X509Certificate2(sCertFileLocation, "D3M@ast3rsR0cks");
-                RSA rsaKey = (RSACryptoServiceProvider) privateCertificate.PrivateKey;
+        private static RSACryptoServiceProvider ExtractPrivateKeyFrom(X509Certificate2 certificate)
+        {
+            string exportedKeyMaterial = certificate.PrivateKey.ToXmlString(true);
+            var key = new RSACryptoServiceProvider(new CspParameters(ProvRsaAes))
+            {
+                PersistKeyInCsp = false
+            };
+            key.FromXmlString(exportedKeyMaterial);
+            return key;
+        }
 
-                var xmlDoc = new XmlDocument { PreserveWhitespace = true };
-                xmlDoc.Load(streamIn);
+        private static XmlDocument ToXmlDocument(XDocument source)
+        {
+            using (var stream = new MemoryStream())
+            {
+                source.Save(stream);
 
-                var signedXml = new SignedXml(xmlDoc) { SigningKey = rsaKey };
+                stream.Seek(0, SeekOrigin.Begin);
 
-                var reference = new Reference { Uri = "" };
-                var env = new XmlDsigEnvelopedSignatureTransform();
-                reference.AddTransform(env);
-                signedXml.AddReference(reference);
-
-                var keyInfo = new KeyInfo();
-                var kin = new KeyInfoName { Value = privateCertificate.Thumbprint };
-                keyInfo.AddClause(kin);
-                signedXml.KeyInfo = keyInfo;
-
-                signedXml.ComputeSignature();
-                XmlElement xmlDigitalSignature = signedXml.GetXml();
-                xmlDoc.DocumentElement.AppendChild(xmlDoc.ImportNode(xmlDigitalSignature, true));
-
-                using (var sout = new MemoryStream())
+                var document = new XmlDocument
                 {
-                    xmlDoc.Save(sout);
-                    sout.Position = 0;
-                    using (var reader = new StreamReader(sout))
-                    {
-                        string xmlOut = reader.ReadToEnd();
-                        return xmlOut;
-                    }
+                    PreserveWhitespace = true
+                };
+                document.Load(stream);
+
+                return document;
+            }
+        }
+
+        private static XmlDocument ToXmlDocument(string source)
+        {
+            var document = new XmlDocument
+            {
+                PreserveWhitespace = true
+            };
+            document.LoadXml(source);
+            return document;
+        }
+
+        private static string GetContentsFrom(XmlDocument source)
+        {
+            using (var stream = new MemoryStream())
+            {
+                source.Save(stream);
+
+                stream.Seek(0, SeekOrigin.Begin);
+
+                using (var reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
                 }
             }
         }

@@ -109,7 +109,8 @@ namespace iDeal.Configuration
                 string absolutePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath);
 
                 return password != null
-                    ? new X509Certificate2(absolutePath, password, X509KeyStorageFlags.MachineKeySet)
+                    ? new X509Certificate2(absolutePath, password,
+                        X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable)
                     : new X509Certificate2(absolutePath);
             }
             catch (Exception exception)
