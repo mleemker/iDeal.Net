@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Security;
+﻿using System.IO;
 using System.Xml.Linq;
 using iDeal.Base;
 using iDeal.Directory;
@@ -14,25 +12,23 @@ namespace iDeal.Http
     {
         public iDealResponse HandleResponse(string response, ISignatureProvider signatureProvider)
         {
-            var xDocument = XElement.Parse(response);
+            XElement xDocument = XElement.Parse(response);
 
             if (!signatureProvider.VerifySignature(response))
             {
-              throw new InvalidSignatureException();
+                throw new InvalidSignatureException();
             }
             switch (xDocument.Name.LocalName)
             {
                 case "DirectoryRes":
                     return new DirectoryResponse(response);
-                
+
                 case "AcquirerTrxRes":
                     return new TransactionResponse(response);
-                
+
                 case "AcquirerStatusRes":
                     var statusResponse = new StatusResponse(response);
 
-                    
-                        
                     return statusResponse;
 
                 case "AcquirerErrorRes":

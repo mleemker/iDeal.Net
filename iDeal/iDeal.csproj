@@ -45,7 +45,6 @@
     <Compile Include="Base\iDealRequest.cs" />
     <Compile Include="Base\iDealResponse.cs" />
     <Compile Include="Base\InvalidSignatureException.cs" />
-    <Compile Include="Base\StringExtensions.cs" />
     <Compile Include="Configuration\ConfigurationSectionHandler.cs" />
     <Compile Include="Configuration\DefaultConfiguration.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />

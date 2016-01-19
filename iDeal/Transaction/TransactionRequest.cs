@@ -7,17 +7,17 @@ namespace iDeal.Transaction
 {
     public class TransactionRequest : iDealRequest
     {
-        private string _merchantReturnUrl;
-        private string _purchaseId;
-        private TimeSpan? _expirationPeriod;
-        private string _description;
-        private string _entranceCode;
-        
+        private string merchantReturnUrl;
+        private string purchaseId;
+        private TimeSpan? expirationPeriod;
+        private string description;
+        private string entranceCode;
+
         /// <summary>
         /// Unique identifier of issuer
         /// </summary>
         public string IssuerId { get; private set; }
-        
+
         /// <summary>
         /// Url to which consumer is redirected after authorizing the payment
         /// </summary>
@@ -25,29 +25,38 @@ namespace iDeal.Transaction
         {
             get
             {
-                return _merchantReturnUrl;
+                return merchantReturnUrl;
             }
             set
             {
-                if (value.IsNullEmptyOrWhiteSpace())
+                if (string.IsNullOrWhiteSpace(value))
+                {
                     throw new InvalidOperationException("Merchant url is required");
-                _merchantReturnUrl = value.Trim();
+                }
+                merchantReturnUrl = value.Trim();
             }
         }
-        
+
         /// <summary>
         /// Unique id determined by the acceptant, which will eventuelly show on the bank account
         /// </summary>
         public string PurchaseId
         {
-            get { return _purchaseId; }
+            get
+            {
+                return purchaseId;
+            }
             set
             {
-                if (value.IsNullEmptyOrWhiteSpace())
+                if (string.IsNullOrWhiteSpace(value))
+                {
                     throw new InvalidOperationException("Purchase id is required");
+                }
                 if (value.Length > 16)
+                {
                     throw new InvalidOperationException("Purchase id cannot contain more than 16 characters");
-                _purchaseId = value;
+                }
+                purchaseId = value;
             }
         }
 
@@ -61,17 +70,24 @@ namespace iDeal.Transaction
         /// </summary>
         public TimeSpan? ExpirationPeriod
         {
-            get { return _expirationPeriod; }
+            get
+            {
+                return expirationPeriod;
+            }
             set
             {
                 if (value.HasValue)
                 {
                     if (value.Value.TotalMinutes < 1)
+                    {
                         throw new InvalidOperationException("Minimum expiration period is one minute");
+                    }
                     if (value.Value.TotalMinutes > 60)
+                    {
                         throw new InvalidOperationException("Maximum expiration period is 1 hour");
+                    }
                 }
-                _expirationPeriod = value;
+                expirationPeriod = value;
             }
         }
 
@@ -80,12 +96,17 @@ namespace iDeal.Transaction
         /// </summary>
         public string Description
         {
-            get { return _description; }
+            get
+            {
+                return description;
+            }
             set
             {
                 if (value.Trim().Length > 32)
+                {
                     throw new InvalidOperationException("Description cannot contain more than 32 characters");
-                _description = value.Trim();
+                }
+                description = value.Trim();
             }
         }
 
@@ -94,14 +115,21 @@ namespace iDeal.Transaction
         /// </summary>
         public string EntranceCode
         {
-            get { return _entranceCode; }
+            get
+            {
+                return entranceCode;
+            }
             set
             {
-                if (value.IsNullEmptyOrWhiteSpace())
+                if (string.IsNullOrWhiteSpace(value))
+                {
                     throw new InvalidOperationException("Entrance code is required");
+                }
                 if (value.Length > 40)
+                {
                     throw new InvalidOperationException("Entrance code cannot contain more than 40 characters");
-                _entranceCode = value;
+                }
+                entranceCode = value;
             }
         }
 
@@ -109,22 +137,13 @@ namespace iDeal.Transaction
         {
             get
             {
-                return
-                    createDateTimestamp +
-                    IssuerId.ToString().PadLeft(4, '0') +
-                    MerchantId.PadLeft(9, '0') +
-                    MerchantSubId +
-                    MerchantReturnUrl +
-                    PurchaseId +
-                    Amount +
-                    "EUR" +
-                    "nl" +
-                    Description +
-                    EntranceCode;
+                return CreateDateTimestamp + IssuerId.PadLeft(4, '0') + MerchantId.PadLeft(9, '0') + MerchantSubId +
+                    MerchantReturnUrl + PurchaseId + Amount + "EUR" + "nl" + Description + EntranceCode;
             }
         }
 
-        public TransactionRequest(string merchantId, int? subId, string issuerId, string merchantReturnUrl, string purchaseId, int amount, TimeSpan? expirationPeriod, string description, string entranceCode)
+        public TransactionRequest(string merchantId, int? subId, string issuerId, string merchantReturnUrl,
+            string purchaseId, int amount, TimeSpan? expirationPeriod, string description, string entranceCode)
         {
             MerchantId = merchantId;
             MerchantSubId = subId ?? 0; // If no sub id is specified, sub id should be 0
@@ -141,31 +160,26 @@ namespace iDeal.Transaction
         {
             XNamespace xmlNamespace = "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1";
 
-            var directoryRequestXmlMessage =
-                new XDocument(
-                    new XDeclaration("1.0", "UTF-8", null),
-                    new XElement(xmlNamespace + "AcquirerTrxReq",
-                        new XAttribute("version", "3.3.1"),
-                        new XElement(xmlNamespace + "createDateTimestamp", createDateTimestamp),
-                        new XElement(xmlNamespace + "Issuer",
-                            new XElement(xmlNamespace + "issuerID", IssuerId.ToString().PadLeft(4,'0'))
-                        ),
-                        new XElement(xmlNamespace + "Merchant",
-                            new XElement(xmlNamespace + "merchantID", MerchantId.PadLeft(9, '0')),
-                            new XElement(xmlNamespace + "subID", "0"),
-                            new XElement(xmlNamespace + "merchantReturnURL", MerchantReturnUrl)
-                        ),
-                        new XElement(xmlNamespace + "Transaction",
-                            new XElement(xmlNamespace + "purchaseID", PurchaseId),
-                            new XElement(xmlNamespace + "amount", Amount),
-                            new XElement(xmlNamespace + "currency", "EUR"),
-                            new XElement(xmlNamespace + "expirationPeriod", "PT" + Convert.ToInt32(Math.Floor(ExpirationPeriod.Value.TotalSeconds)) + "S"),
-                            new XElement(xmlNamespace + "language", "nl"),
-                            new XElement(xmlNamespace + "description", Description),
-                            new XElement(xmlNamespace + "entranceCode", EntranceCode)
-                        )
-                    )
-                );
+            var directoryRequestXmlMessage = new XDocument(
+                new XDeclaration("1.0", "UTF-8", null),
+                new XElement(xmlNamespace + "AcquirerTrxReq",
+                    new XAttribute("version", "3.3.1"),
+                    new XElement(xmlNamespace + "createDateTimestamp", CreateDateTimestamp),
+                    new XElement(xmlNamespace + "Issuer",
+                        new XElement(xmlNamespace + "issuerID", IssuerId.PadLeft(4, '0'))),
+                    new XElement(xmlNamespace + "Merchant",
+                        new XElement(xmlNamespace + "merchantID", MerchantId.PadLeft(9, '0')),
+                        new XElement(xmlNamespace + "subID", "0"),
+                        new XElement(xmlNamespace + "merchantReturnURL", MerchantReturnUrl)),
+                    new XElement(xmlNamespace + "Transaction",
+                        new XElement(xmlNamespace + "purchaseID", PurchaseId),
+                        new XElement(xmlNamespace + "amount", Amount),
+                        new XElement(xmlNamespace + "currency", "EUR"),
+                        new XElement(xmlNamespace + "expirationPeriod",
+                            "PT" + Convert.ToInt32(Math.Floor(ExpirationPeriod.Value.TotalSeconds)) + "S"),
+                        new XElement(xmlNamespace + "language", "nl"),
+                        new XElement(xmlNamespace + "description", Description),
+                        new XElement(xmlNamespace + "entranceCode", EntranceCode))));
 
             return signatureProvider.SignXml(directoryRequestXmlMessage);
         }

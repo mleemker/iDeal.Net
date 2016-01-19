@@ -7,19 +7,24 @@ namespace iDeal.Status
 {
     public class StatusRequest : iDealRequest
     {
-        private string _transactionId;
+        private string transactionId;
 
         /// <summary>
         /// Unique 16 digits number, assigned by the acquirer to the transaction
         /// </summary>
         public string TransactionId
         {
-            get { return _transactionId; }
+            get
+            {
+                return transactionId;
+            }
             private set
             {
-                if (value.IsNullEmptyOrWhiteSpace() || value.Length != 16)
+                if (string.IsNullOrWhiteSpace(value) || value.Length != 16)
+                {
                     throw new InvalidOperationException("TransactionId must contain exactly 16 characters");
-                _transactionId = value;
+                }
+                transactionId = value;
             }
         }
 
@@ -27,10 +32,7 @@ namespace iDeal.Status
         {
             get
             {
-                return createDateTimestamp +
-                       MerchantId.PadLeft(9, '0') +
-                       MerchantSubId +
-                       TransactionId;
+                return CreateDateTimestamp + MerchantId.PadLeft(9, '0') + MerchantSubId + TransactionId;
             }
         }
 
@@ -45,21 +47,16 @@ namespace iDeal.Status
         {
             XNamespace xmlNamespace = "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1";
 
-            var directoryRequestXmlMessage =
-                new XDocument(
-                    new XDeclaration("1.0", "UTF-8", null),
-                    new XElement(xmlNamespace + "AcquirerStatusReq",
-                        new XAttribute("version", "3.3.1"),
-                        new XElement(xmlNamespace + "createDateTimestamp", createDateTimestamp),
-                        new XElement(xmlNamespace + "Merchant",
-                            new XElement(xmlNamespace + "merchantID", MerchantId.PadLeft(9, '0')),
-                            new XElement(xmlNamespace + "subID", MerchantSubId)
-                        ),
-                        new XElement(xmlNamespace + "Transaction",
-                            new XElement(xmlNamespace + "transactionID", TransactionId)
-                        )
-                    )
-                );
+            var directoryRequestXmlMessage = new XDocument(
+                new XDeclaration("1.0", "UTF-8", null),
+                new XElement(xmlNamespace + "AcquirerStatusReq",
+                    new XAttribute("version", "3.3.1"),
+                    new XElement(xmlNamespace + "createDateTimestamp", CreateDateTimestamp),
+                    new XElement(xmlNamespace + "Merchant",
+                        new XElement(xmlNamespace + "merchantID", MerchantId.PadLeft(9, '0')),
+                        new XElement(xmlNamespace + "subID", MerchantSubId)),
+                    new XElement(xmlNamespace + "Transaction",
+                        new XElement(xmlNamespace + "transactionID", TransactionId))));
 
             return signatureProvider.SignXml(directoryRequestXmlMessage);
         }

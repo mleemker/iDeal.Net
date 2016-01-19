@@ -6,8 +6,14 @@ namespace iDeal.Base
     {
         public int AcquirerId { get; protected set; }
 
-        public string createDateTimestamp { get; protected set; }
+        public string CreateDateTimestamp { get; protected set; }
 
-        public DateTime createDateTimestampLocalTime { get { return DateTime.Parse(createDateTimestamp); } }
+        public DateTime CreateDateTimestampLocalTime
+        {
+            get
+            {
+                return DateTime.Parse(CreateDateTimestamp);
+            }
+        }
     }
 }

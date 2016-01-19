@@ -1,29 +1,37 @@
 ﻿using System;
 using iDeal.SignatureProviders;
-using iDeal.Base;
 
 namespace iDeal.Base
 {
     public abstract class iDealRequest
     {
-        protected string _merchantId;
-        protected int _subId;
+        private string merchantId;
+        private int subId;
 
         /// <summary>
         /// Unique identifier of merchant
         /// </summary>
         public string MerchantId
         {
-            get { return _merchantId; }
+            get
+            {
+                return merchantId;
+            }
             protected set
             {
-                if (value.IsNullEmptyOrWhiteSpace())
+                if (string.IsNullOrWhiteSpace(value))
+                {
                     throw new InvalidOperationException("MerchantId does not contain a value");
+                }
                 if (value.Contains(" "))
+                {
                     throw new InvalidOperationException("MerchantId cannot contain whitespaces");
+                }
                 if (value.Length > 9)
+                {
                     throw new InvalidOperationException("MerchantId cannot contain more than 9 characters.");
-                _merchantId = value;
+                }
+                merchantId = value;
             }
         }
 
@@ -32,19 +40,24 @@ namespace iDeal.Base
         /// </summary>
         public int MerchantSubId
         {
-            get { return _subId; }
+            get
+            {
+                return subId;
+            }
             protected set
             {
                 if (value < 0 || value > 6)
+                {
                     throw new InvalidOperationException("SubId must contain a value ranging from 0 to 6");
-                _subId = value;
+                }
+                subId = value;
             }
         }
 
         /// <summary>
         /// Create datetimestamp of request
         /// </summary>
-        public string createDateTimestamp { get; private set; }
+        public string CreateDateTimestamp { get; private set; }
 
         public abstract string MessageDigest { get; }
 
@@ -52,7 +65,7 @@ namespace iDeal.Base
 
         protected iDealRequest()
         {
-            createDateTimestamp = DateTime.Now.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+            CreateDateTimestamp = DateTime.Now.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+
 namespace iDeal.Configuration
 {
     public interface IConfigurationSectionHandler
@@ -6,7 +7,7 @@ namespace iDeal.Configuration
         string MerchantId { get; }
         int MerchantSubId { get; }
         string AcquirerUrl { get; }
-        
+
         StoreLocation? AcceptantCertificateStoreLocation { get; }
         string AcceptantCertificateThumbprint { get; }
         string AcceptantCertificateStoreName { get; }

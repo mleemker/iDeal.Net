@@ -6,51 +6,69 @@ using iDeal.Http;
 using iDeal.SignatureProviders;
 using iDeal.Status;
 using iDeal.Transaction;
-using iDeal.Base;
 
 namespace iDeal
 {
     public class iDealService
     {
-        private readonly IConfiguration _configuration;
-        private readonly ISignatureProvider _signatureProvider;
-        private readonly IiDealHttpRequest _iDealHttpRequest;
-        private readonly IiDealHttpResponseHandler _iDealHttpResponseHandler;
+        private readonly IConfiguration configuration;
+        private readonly ISignatureProvider signatureProvider;
+        private readonly IiDealHttpRequest iDealHttpRequest;
+        private readonly IiDealHttpResponseHandler iDealHttpResponseHandler;
 
         /// <summary>
         /// Parameterless constructor using default configuration (read from .config file)
         /// </summary>
-        public iDealService() : this(new DefaultConfiguration( (ConfigurationSectionHandler)ConfigurationManager.GetSection("iDeal"))) { }
+        public iDealService()
+            : this(new DefaultConfiguration((ConfigurationSectionHandler) ConfigurationManager.GetSection("iDeal")))
+        {
+        }
 
-
-        public iDealService(IConfiguration configuration) : 
-            this(configuration, 
+        public iDealService(IConfiguration configuration)
+            : this(
+                configuration,
                 new SignatureProvider(configuration.AcceptantCertificate, configuration.AcquirerCertificate),
-                new iDealHttpRequest(), 
-                new iDealHttpResponseHandler()){}
+                new iDealHttpRequest(), new iDealHttpResponseHandler())
+        {
+        }
 
-        public iDealService(IConfiguration configuration, ISignatureProvider signatureProvider, IiDealHttpRequest iDealHttpRequest, IiDealHttpResponseHandler iDealHttpResponseHandler)
+        public iDealService(IConfiguration configuration, ISignatureProvider signatureProvider,
+            IiDealHttpRequest iDealHttpRequest, IiDealHttpResponseHandler iDealHttpResponseHandler)
         {
             // Configuration guard clauses
-            if (configuration.MerchantId.IsNullEmptyOrWhiteSpace())
+            if (string.IsNullOrWhiteSpace(configuration.MerchantId))
+            {
                 throw new ConfigurationErrorsException("Merchant Id is not set");
+            }
             if (configuration.MerchantId.Length > 9)
+            {
                 throw new ConfigurationErrorsException("Merchant Id cannot contain more as 9 characters");
+            }
             if (configuration.MerchantSubId < 0 || configuration.MerchantSubId > 6)
+            {
                 throw new ConfigurationErrorsException("SubId must contain a value ranging from 0 to 6");
-            if (configuration.AcquirerUrl.IsNullEmptyOrWhiteSpace())
+            }
+            if (string.IsNullOrWhiteSpace(configuration.AcquirerUrl))
+            {
                 throw new ConfigurationErrorsException("Url of acquirer is not set");
+            }
             if (configuration.AcceptantCertificate == null)
+            {
                 throw new ConfigurationErrorsException("Acceptant's certificate is not set");
+            }
             if (!configuration.AcceptantCertificate.HasPrivateKey)
+            {
                 throw new ConfigurationErrorsException("Acceptant's certificate does not contain private key");
+            }
             if (configuration.AcquirerCertificate == null)
+            {
                 throw new ConfigurationErrorsException("Acquirer's certificate is not set");
+            }
 
-            _configuration = configuration;
-            _signatureProvider = signatureProvider;
-            _iDealHttpRequest = iDealHttpRequest;
-            _iDealHttpResponseHandler = iDealHttpResponseHandler;
+            this.configuration = configuration;
+            this.signatureProvider = signatureProvider;
+            this.iDealHttpRequest = iDealHttpRequest;
+            this.iDealHttpResponseHandler = iDealHttpResponseHandler;
         }
 
         /// <summary>
@@ -59,43 +77,69 @@ namespace iDeal
         public DirectoryResponse SendDirectoryRequest()
         {
             // Set up dependencies for http request
-            var directoryRequest = new DirectoryRequest(_configuration.MerchantId, _configuration.MerchantSubId);
-            
+            var directoryRequest = new DirectoryRequest(configuration.MerchantId, configuration.MerchantSubId);
+
             // Execute http request
-            return (DirectoryResponse)_iDealHttpRequest.SendRequest(directoryRequest, _signatureProvider, _configuration.AcquirerUrl, _iDealHttpResponseHandler);
+            return
+                (DirectoryResponse)
+                    iDealHttpRequest.SendRequest(directoryRequest, signatureProvider, configuration.AcquirerUrl,
+                        iDealHttpResponseHandler);
         }
 
         /// <summary>
         /// Send transaction request to acquirer (merchant's bank)
         /// </summary>
-        /// <param name="issuerId">Unique identifier of issuer (consumer's bank). Id can be retrieved with a directory request</param>
-        /// <param name="merchantReturnUrl">Url to which the consumer is redirected after finishing the transaction</param>
-        /// <param name="purchaseId">Unique identifier generated by merchant/acceptant</param>
-        /// <param name="amount">Amount in cents (eur)</param>
-        /// <param name="expirationPeriod">Period consumer has to finish the tranaction before it is marked as expired by the issuer (consumer's bank)</param>
-        /// <param name="description">Description, printed on bank statement</param>
-        /// <param name="entranceCode">Unique code to identify consumer when returning, generated by merchant/acceptant</param>
-        public TransactionResponse SendTransactionRequest(string issuerId, string merchantReturnUrl, string purchaseId, int amount, TimeSpan? expirationPeriod, string description, string entranceCode)
+        /// <param name="issuerId">
+        /// Unique identifier of issuer (consumer's bank). Id can be retrieved with a directory request
+        /// </param>
+        /// <param name="merchantReturnUrl">
+        /// Url to which the consumer is redirected after finishing the transaction
+        /// </param>
+        /// <param name="purchaseId">
+        /// Unique identifier generated by merchant/acceptant
+        /// </param>
+        /// <param name="amount">
+        /// Amount in cents (eur)
+        /// </param>
+        /// <param name="expirationPeriod">
+        /// Period consumer has to finish the tranaction before it is marked as expired by the issuer (consumer's bank)
+        /// </param>
+        /// <param name="description">
+        /// Description, printed on bank statement
+        /// </param>
+        /// <param name="entranceCode">
+        /// Unique code to identify consumer when returning, generated by merchant/acceptant
+        /// </param>
+        public TransactionResponse SendTransactionRequest(string issuerId, string merchantReturnUrl, string purchaseId,
+            int amount, TimeSpan? expirationPeriod, string description, string entranceCode)
         {
             // Set up dependencies for http request
-            var transactionRequest = new TransactionRequest(_configuration.MerchantId, _configuration.MerchantSubId, issuerId, merchantReturnUrl, purchaseId, amount, expirationPeriod, description, entranceCode );
-            
+            var transactionRequest = new TransactionRequest(configuration.MerchantId, configuration.MerchantSubId,
+                issuerId, merchantReturnUrl, purchaseId, amount, expirationPeriod, description, entranceCode);
+
             // Execute http request
-            return (TransactionResponse)_iDealHttpRequest.SendRequest(transactionRequest, _signatureProvider, _configuration.AcquirerUrl, _iDealHttpResponseHandler);
+            return
+                (TransactionResponse)
+                    iDealHttpRequest.SendRequest(transactionRequest, signatureProvider, configuration.AcquirerUrl,
+                        iDealHttpResponseHandler);
         }
 
         /// <summary>
         /// Retrieve status of transaction (Success, Cancelled Failure, Expired, Open)
         /// </summary>
-        /// <param name="transactionId">Unique identifier of transaction obtained when the transaction was issued</param>
+        /// <param name="transactionId">
+        /// Unique identifier of transaction obtained when the transaction was issued
+        /// </param>
         public StatusResponse SendStatusRequest(string transactionId)
         {
             // Set up dependencies for http request
-            var statusRequest = new StatusRequest(_configuration.MerchantId, _configuration.MerchantSubId, transactionId);
-            
-            // Execute http request
-            return (StatusResponse)_iDealHttpRequest.SendRequest(statusRequest, _signatureProvider, _configuration.AcquirerUrl, _iDealHttpResponseHandler);
-        }
+            var statusRequest = new StatusRequest(configuration.MerchantId, configuration.MerchantSubId, transactionId);
 
+            // Execute http request
+            return
+                (StatusResponse)
+                    iDealHttpRequest.SendRequest(statusRequest, signatureProvider, configuration.AcquirerUrl,
+                        iDealHttpResponseHandler);
+        }
     }
 }
