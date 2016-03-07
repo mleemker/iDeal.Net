@@ -134,15 +134,6 @@ namespace iDeal.Transaction
             }
         }
 
-        public override string MessageDigest
-        {
-            get
-            {
-                return CreateDateTimestamp + IssuerId.PadLeft(4, '0') + MerchantId.PadLeft(9, '0') + MerchantSubId +
-                    MerchantReturnUrl + PurchaseId + Amount + "EUR" + "nl" + Description + EntranceCode;
-            }
-        }
-
         public TransactionRequest(string merchantId, int? subId, string issuerId, string merchantReturnUrl,
             string purchaseId, decimal amount, TimeSpan? expirationPeriod, string description, string entranceCode)
         {

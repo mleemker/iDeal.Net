@@ -28,14 +28,6 @@ namespace iDeal.Status
             }
         }
 
-        public override string MessageDigest
-        {
-            get
-            {
-                return CreateDateTimestamp + MerchantId.PadLeft(9, '0') + MerchantSubId + TransactionId;
-            }
-        }
-
         public StatusRequest(string merchantId, int? subId, string transactionId)
         {
             MerchantId = merchantId;

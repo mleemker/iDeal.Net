@@ -12,14 +12,6 @@ namespace iDeal.Directory
             MerchantSubId = subId ?? 0; // If no sub id is specified, sub id should be 0
         }
 
-        public override string MessageDigest
-        {
-            get
-            {
-                return CreateDateTimestamp + MerchantId + MerchantSubId;
-            }
-        }
-
         /// <summary>
         /// Creates xml representation of directory request
         /// </summary>

@@ -59,8 +59,6 @@ namespace iDeal.Base
         /// </summary>
         public string CreateDateTimestamp { get; private set; }
 
-        public abstract string MessageDigest { get; }
-
         public abstract string ToXml(ISignatureProvider signatureProvider);
 
         protected iDealRequest()
