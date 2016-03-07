@@ -17,14 +17,14 @@ namespace iDeal.Http
             // Create request
             var request = (HttpWebRequest) WebRequest.Create(url);
             request.ProtocolVersion = HttpVersion.Version11;
-            request.ContentType = "text/xml";
+            request.ContentType = "text/xml charset=UTF-8";
             request.Method = "POST";
-            // request.Proxy = new WebProxy("192.168.1.8", 8080);
 
             // Set content
-            string xml = idealRequest.ToXml(signatureProvider);
-            byte[] postBytes = Encoding.ASCII.GetBytes(xml);
+            string xml = Log.Append(idealRequest.ToXml(signatureProvider));
+            byte[] postBytes = Encoding.UTF8.GetBytes(xml);
 
+            request.ContentLength = postBytes.Length;
             // Send
             using (Stream requestStream = request.GetRequestStream())
             {
@@ -36,7 +36,8 @@ namespace iDeal.Http
             {
                 using (var reader = new StreamReader(response.GetResponseStream()))
                 {
-                    return iDealHttpResponseHandler.HandleResponse(reader.ReadToEnd(), signatureProvider);
+                    var responseXml = Log.Append(reader.ReadToEnd());
+                    return iDealHttpResponseHandler.HandleResponse(responseXml, signatureProvider);
                 }
             }
         }

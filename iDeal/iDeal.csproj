@@ -60,6 +60,7 @@
     <Compile Include="Http\IiDealHttpRequest.cs" />
     <Compile Include="Http\IiDealHttpResponseHandler.cs" />
     <Compile Include="iDealService.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SignatureProviders\ISignatureProvider.cs" />
     <Compile Include="SignatureProviders\SignatureProvider.cs" />
