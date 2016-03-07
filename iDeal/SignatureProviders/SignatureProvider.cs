@@ -112,20 +112,13 @@ namespace iDeal.SignatureProviders
 
         private static XmlDocument ToXmlDocument(XDocument source)
         {
-            using (var stream = new MemoryStream())
+
+            var document = new XmlDocument
             {
-                source.Save(stream);
-
-                stream.Seek(0, SeekOrigin.Begin);
-
-                var document = new XmlDocument
-                {
-                    PreserveWhitespace = true
-                };
-                document.Load(stream);
-
-                return document;
-            }
+                PreserveWhitespace = true
+            };
+            document.Load(source.CreateReader());
+            return document;
         }
 
         private static XmlDocument ToXmlDocument(string source)
@@ -140,17 +133,8 @@ namespace iDeal.SignatureProviders
 
         private static string GetContentsFrom(XmlDocument source)
         {
-            using (var stream = new MemoryStream())
-            {
-                source.Save(stream);
+            return source.OuterXml;
 
-                stream.Seek(0, SeekOrigin.Begin);
-
-                using (var reader = new StreamReader(stream))
-                {
-                    return reader.ReadToEnd();
-                }
-            }
         }
     }
 }
