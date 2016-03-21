@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("iDeal.NET")]
-[assembly: AssemblyDescription("https://github.com/bkoelman/iDeal.Net")]
+[assembly: AssemblyDescription("https://github.com/mleemker/iDeal.Net")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Malengo")]
 [assembly: AssemblyProduct("iDeal.NET")]
 [assembly: AssemblyCopyright("LGPL")]
 [assembly: AssemblyTrademark("")]
@@ -22,8 +22,7 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 
-[assembly: Guid("5a5fbc8a-bde4-4f1f-acdf-f8300e416755")]
-
+[assembly: Guid("42A4FB45-84D3-459F-B5EA-AD2E1F4ED41D")]
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version
@@ -35,5 +34,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("4.0.0.0")]
+[assembly: AssemblyFileVersion("4.0.0.0")]
