@@ -112,7 +112,6 @@ namespace iDeal.SignatureProviders
 
         private static XmlDocument ToXmlDocument(XDocument source)
         {
-
             var document = new XmlDocument
             {
                 PreserveWhitespace = true
@@ -134,7 +133,6 @@ namespace iDeal.SignatureProviders
         private static string GetContentsFrom(XmlDocument source)
         {
             return source.OuterXml;
-
         }
     }
 }

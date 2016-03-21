@@ -21,7 +21,7 @@ namespace iDeal.Http
             request.Method = "POST";
 
             // Set content
-            string xml = Log.Append(idealRequest.ToXml(signatureProvider));
+            string xml = idealRequest.ToXml(signatureProvider);
             byte[] postBytes = Encoding.UTF8.GetBytes(xml);
 
             request.ContentLength = postBytes.Length;
@@ -36,7 +36,7 @@ namespace iDeal.Http
             {
                 using (var reader = new StreamReader(response.GetResponseStream()))
                 {
-                    var responseXml = Log.Append(reader.ReadToEnd());
+                    var responseXml = reader.ReadToEnd();
                     return iDealHttpResponseHandler.HandleResponse(responseXml, signatureProvider);
                 }
             }
