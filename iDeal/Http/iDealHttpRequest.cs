@@ -8,11 +8,18 @@ namespace iDeal.Http
 {
     public class iDealHttpRequest : IiDealHttpRequest
     {
+        static iDealHttpRequest()
+        {
+            ServicePointManager.ServerCertificateValidationCallback =
+                (sender, certificate, chain, sslPolicyErrors) => true;
+
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls11;
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+        }
+
         public iDealResponse SendRequest(iDealRequest idealRequest, ISignatureProvider signatureProvider, string url,
             IiDealHttpResponseHandler iDealHttpResponseHandler)
         {
-            ServicePointManager.ServerCertificateValidationCallback =
-                ((sender, certificate, chain, sslPolicyErrors) => true);
 
             // Create request
             var request = (HttpWebRequest) WebRequest.Create(url);
